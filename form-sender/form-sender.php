@@ -247,7 +247,7 @@ function mt_add_pages() {
 function formsender_settings() {
   echo '
   <div class="wrap">
-    <h1 class="wp-heading-inline formsend-settings">Настройки отпраки</h1>
+    <h1 class="wp-heading-inline formsend-settings">Настройки отправки</h1>
     <form action="'.$_SERVER['REQUEST_URI'].'" method="post">
       <table class="form-table">
         <tr class="field group-1">
