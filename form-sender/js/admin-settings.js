@@ -47,32 +47,44 @@ jQuery(document).ready(function(){
   '            <td>Тип поля</td>'+
   '            <td>'+
   '              <select id="field-type">'+
+  '                <option value="">--Выберите тип поля--</option>'+
   '                <option value="text">Текстовое поле</option>'+
-  '                <option value="email">Поле для e-mail</option>'+
   '                <option value="tel">Поле для телефона</option>'+
+  '                <option value="email">Поле для e-mail</option>'+
   '                <option value="textarea">Текстовая область</option>'+
   '                <option value="select">Выпадающий список</option>'+
+  '                <option value="radio">Радио кнопки</option>'+
+  '                <option value="checkbox">Группа чекбоксов</option>'+
+  '                <option value="accept">Согласие на обработку</option>'+
   '                <option value="submit">Кнопка отправки</option>'+
   '              </select>'+
   '            </td>'+
   '          </tr>'+
-  '          <tr>'+
+  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,checkbox,submit" style="display:none;">'+
   '            <td>Имя поля</td>'+
   '            <td><input type="text" id="field-name"></td>'+
   '          </tr>'+
-  '          <tr>'+
+  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,checkbox,accept" style="display:none;">'+
+  '            <td>Подсказка для поля</td>'+
+  '            <td><input type="text" id="field-alt"></td>'+
+  '          </tr>'+
+  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,submit" style="display:none;">'+
   '            <td>Заполнитель поля</td>'+
   '            <td><input type="text" id="field-value"></td>'+
   '          </tr>'+
-  '          <tr>'+
+  '          <tr class="flied-property" data-for="select,radio,checkbox" style="display:none;">'+
+  '            <td>Варианты ответа</td>'+
+  '            <td><textarea id="field-options" rows="5"></textarea></td>'+
+  '          </tr>'+
+  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,checkbox,submit" style="display:none;">'+
   '            <td>ID поля</td>'+
   '            <td><input type="text" id="field-id"></td>'+
   '          </tr>'+
-  '          <tr>'+
+  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,checkbox,accept,submit" style="display:none;">'+
   '            <td>Класс поля</td>'+
   '            <td><input type="text" id="field-class"></td>'+
   '          </tr>'+
-  '          <tr>'+
+  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,accept,checkbox" style="display:none;">'+
   '            <td>Обязательное поле</td>'+
   '            <td><input type="checkbox" id="field-required"></td>'+
   '          </tr>'+
@@ -83,6 +95,18 @@ jQuery(document).ready(function(){
   '    </div>'+
   '  </div>';
   jQuery("#wpwrap").before(modal_html);
+  
+  // Показать нужный пабор свойств в модальном окне в соответствии с выбранным типом поля
+  jQuery(document).on("change", "#field-type", function(e) {
+    type = jQuery("#field-type").val();
+    jQuery(".form-modal .flied-property").hide();
+    jQuery(".form-modal .flied-property").each(function(){
+      prop_for = jQuery(this).data("for");
+      if (prop_for.indexOf(type)>-1){
+        jQuery(this).show();
+      }
+    });
+  });
   
   // Открытие/закрытие модального окна
   jQuery(".callback-btn").click(function(){
@@ -106,6 +130,7 @@ jQuery(document).ready(function(){
   });
 });
 
+
 // Показать/скрыть поля настройки SMTP-соединения
 function smtp_settings(){
   method = jQuery(".formsender-method").val();
@@ -119,28 +144,85 @@ function smtp_settings(){
   }
 }
 
+
 // Добавление поля в форму
 function addFormField(){
-  if (jQuery("#field-name").val().length<1){
-    alert("Не заполнены обязательные поля");
-    return;
-  }
+  //if (jQuery("#field-name").val().length<1){
+  //  alert("Не заполнены обязательные поля");
+  //  return;
+  //}
   
   let required = '';
   if (jQuery("#field-required").prop('checked')==true) required = 'required';
   
   switch (jQuery("#field-type").val()){
     case 'textarea':
-      field = '<textarea name="'+jQuery("#field-name").val()+'" '+required+' placeholder="'+jQuery("#field-value").val()+'" id="'+jQuery("#field-id").val()+'" class="'+jQuery("#field-class").val()+'"></textarea>';
+      field = '<label>\n';
+      if (jQuery("#field-alt").val().length>0){
+        field += '  <p>'+jQuery("#field-alt").val()+'</p>\n';
+      }
+      field += '  <textarea name="'+jQuery("#field-name").val()+'" '+required+' placeholder="'+jQuery("#field-value").val()+'" id="'+jQuery("#field-id").val()+'" class="'+jQuery("#field-class").val()+'"></textarea>\n';
+      field += '</label>\n';
       break;
+      
     case 'select':
-      field = '<select name="'+jQuery("#field-name").val()+'" '+required+' id="'+jQuery("#field-id").val()+'" class="'+jQuery("#field-class").val()+'"></select>';
+      field = '<label>\n';
+      if (jQuery("#field-alt").val().length>0){
+        field += '  <p>'+jQuery("#field-alt").val()+'</p>\n';
+      }
+      field +='  <select name="'+jQuery("#field-name").val()+'" '+required+' id="'+jQuery("#field-id").val()+'" class="'+jQuery("#field-class").val()+'">\n';
+      if (jQuery("#field-value").val().length>0){
+        field += '    <option value="">'+jQuery("#field-value").val()+'</option>\n';
+      }
+      options = jQuery("#field-options").val().split("\n");
+      for (o in options){
+        field += '    <option value="'+options[o]+'">'+options[o]+'</option>\n';
+      }
+      field += '  </select>\n';
+      field += '</label>\n';
       break;
+      
+    case 'radio':
+      field = '<div>\n';
+      if (jQuery("#field-alt").val().length>0){
+        field += '  <p>'+jQuery("#field-alt").val()+'</p>\n';
+      }
+      options = jQuery("#field-options").val().split("\n");
+      for (o in options){
+        field += '  <label><input type="radio" name="'+jQuery("#field-name").val()+'" value="'+options[o]+'" '+required+' placeholder="'+jQuery("#field-value").val()+'" id="'+jQuery("#field-id").val()+'" class="'+jQuery("#field-class").val()+'"> '+options[o]+'</label>\n';
+      }
+      field += '</div>\n';
+      break;
+      
+    case 'checkbox':
+      field = '<div>\n';
+      if (jQuery("#field-alt").val().length>0){
+        field += '  <p>'+jQuery("#field-alt").val()+'</p>\n';
+      }
+      options = jQuery("#field-options").val().split("\n");
+      for (o in options){
+        field += '  <label><input type="checkbox" name="'+jQuery("#field-name").val()+'[]" value="'+options[o]+'" class="'+jQuery("#field-class").val()+'"> '+options[o]+'</label>\n';
+      }
+      field += '</div>\n';
+      break;
+      
+    case 'accept':
+      field = '<label>\n';
+      field += '  <input type="checkbox" name="accept" value="1" '+required+' class="'+jQuery("#field-class").val()+'"> '+jQuery("#field-alt").val()+'\n';
+      field += '</label>\n';
+      break;
+      
     case 'submit':
-      field = '<input type="submit" name="'+jQuery("#field-name").val()+'" value="'+jQuery("#field-value").val()+'" id="'+jQuery("#field-id").val()+'" class="'+jQuery("#field-class").val()+'">';
+      field = '<input type="submit" name="'+jQuery("#field-name").val()+'" value="'+jQuery("#field-value").val()+'" id="'+jQuery("#field-id").val()+'" class="'+jQuery("#field-class").val()+'">\n';
       break;
+      
     default:
-      field = '<input type="'+jQuery("#field-type").val()+'" name="'+jQuery("#field-name").val()+'" '+required+' placeholder="'+jQuery("#field-value").val()+'" id="'+jQuery("#field-id").val()+'" class="'+jQuery("#field-class").val()+'">';
+      field = '<label>\n';
+      if (jQuery("#field-alt").val().length>0){
+        field += '  <p>'+jQuery("#field-alt").val()+'</p>\n';
+      }
+      field += '  <input type="'+jQuery("#field-type").val()+'" name="'+jQuery("#field-name").val()+'" '+required+' placeholder="'+jQuery("#field-value").val()+'" id="'+jQuery("#field-id").val()+'" class="'+jQuery("#field-class").val()+'">\n';
+      field += '</label>\n';
       break;
   }
   

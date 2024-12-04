@@ -50,8 +50,21 @@
 .form-modal > div table {
 	margin: 20px 0;
 }
-.preview-block input {
+.form-modal > div table label {
+	display: block;
+	width: 100%;
+}
+.form-modal > div table input[type="text"],
+.form-modal > div table textarea {
 	margin-bottom: 5px !important;
+	width: 100%;
+}
+.preview-block input[type="text"],
+.preview-block input[type="email"],
+.preview-block input[type="tel"],
+.preview-block textarea {
+	margin-bottom: 5px !important;
+	width: 100%;
 }
 .preview-block input[type="submit"] {
 	pointer-events: none;

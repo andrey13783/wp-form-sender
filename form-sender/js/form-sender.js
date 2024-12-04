@@ -1,6 +1,6 @@
 $(document).ready(function(){
 	// Оправка формы
-	$(".submit").click(function(){
+	$(".contact-form input[type='submit']").click(function(){
 		event.preventDefault();
 		form = $(this).closest("form");
 		submitForm(form);
@@ -13,15 +13,18 @@ function validateForm(form){
 	result = true;
 	form.find("[required]").removeClass("error-input");
 	form.find("[required]").each(function(){
-		if ($(this).val().length<3){
+		type = $(this).attr("type");
+		if ((type=='checkbox' || type=='radio') && $(this).prop("checked")!=true){
 			$(this).addClass("error-input");
 			result = false;
-			//console.log($(this).attr("name"));
-			error_text = "<p>Заполнены не все обязательные поля.</p>";
+			console.log($(this).attr("name")+" - "+$(this).prop("checked"));
+			error_text = "<p>Есть ошибки при заполнении формы.</p>";
 		}
-		if (($(this).hasClass("phone-number")) && ($(this).val().indexOf("+")<0)){
+		if ((type=='text' || type=='tel' || type=='email') && $(this).val().length<3){
+			$(this).addClass("error-input");
 			result = false;
-			error_text = "<p>Укажите корректный номер телефона с кодом страны.</p>";
+			console.log($(this).attr("name")+" - "+$(this).val());
+			error_text = "<p>Заполнены не все обязательные поля.</p>";
 		}
 	});
 	return result;

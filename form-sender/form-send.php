@@ -11,6 +11,7 @@
     $text = nl2br(get_field('letter_text', $form_id));
     
     foreach ($_REQUEST as $key=>$value){
+      $value = is_array($value) ? implode('; ', $value) : $value;
       $subject = str_replace('['.$key.']', $value, $subject);
       $text = str_replace('['.$key.']', $value, $text);
     }
