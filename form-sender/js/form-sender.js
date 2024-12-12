@@ -44,9 +44,12 @@ function submitForm(form){
 			console.log(data);
 				obj = JSON.parse(data);
 				if (obj.result=="true"){
-					$(form).find("input, select").prop("disabled","true")
+					$(form).find("input, textarea, select").prop("disabled","true");
 				}
 				$(form).find(".form-result").html(obj.message);
+				if (obj.redirect.length>0){
+					location.href = obj.redirect;
+				}
 			},
 			error:	function(xhr, str){
 				$(form).find(".form-result").html("<p>Возникла ошибка: " + xhr.responseCode+"</p>");

@@ -9,6 +9,7 @@
     $save = get_field('save_letters', $form_id);
     $subject = get_field('letter_subject', $form_id);
     $text = nl2br(get_field('letter_text', $form_id));
+    $success_url = get_field('success_url', $form_id);
     
     foreach ($_REQUEST as $key=>$value){
       $value = is_array($value) ? implode('; ', $value) : $value;
@@ -16,6 +17,7 @@
       $text = str_replace('['.$key.']', $value, $text);
     }
     
+    // Отправка письма
     $result = sendMail(get_field('form_mail', $form_id), $subject, $text);
     
     if (!empty(get_field('form_mail2', $form_id))){
@@ -31,6 +33,7 @@
       $result2 = sendMail($mail2, $subject2, $text2);
     }
     
+    // Сохранение писем в БД
     if (!empty($save)){
       $letter_id = wp_insert_post( array(
         'post_type'    => 'formarchive',
@@ -38,6 +41,12 @@
         'post_status'  => 'private',
         'post_content' => $text
       ) );
+      
+      $field = 1;
+      foreach ($_REQUEST as $key=>$val){
+        add_post_meta($letter_id, 'formfield_'.$field, $val);
+        $field++;
+      }
     }
     
     // Telegram
@@ -89,20 +98,23 @@
     if ($result=='true'){
       $output = array(
         'result' => 'true',
-        'message' => '<p>'.nl2br(get_field('success_text', $form_id)).'</p>'
+        'message' => '<p>'.nl2br(get_field('success_text', $form_id)).'</p>',
+        'redirect' => $success_url,
       );
     }
     else{
       $output = array(
         'result' => 'false',
-        'message' => '<p>Извините. Произошла ошибка. '.$result.'</p>'
+        'message' => '<p>Извините. Произошла ошибка. '.$result.'</p>',
+        'redirect' => '',
       );
     }
   }
   else{
     $output = array(
       'result' => 'false',
-      'message' => '<p>Ошибка! Неверные параметры.</p>'
+      'message' => '<p>Ошибка! Неверные параметры.</p>',
+      'redirect' => '',
     );
   }
   

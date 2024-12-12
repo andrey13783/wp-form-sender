@@ -134,6 +134,15 @@ function my_acf_init() {
 				'wrapper' => [
 					'class' => 'field group-4',
 				],
+			],[
+				'key'   => 'success_url',
+				'label' => 'Переход после отправки',
+				'name'  => 'success_url',
+				'type'  => 'text',
+				'required' => 0,
+				'wrapper' => [
+					'class' => 'field group-4',
+				],
 			],
 		],
 		'location' => [
@@ -142,6 +151,74 @@ function my_acf_init() {
 					'param'    => 'post_type',
 					'operator' => '==',
 					'value'    => 'formsender',
+				],
+			],
+		],
+		'label_placement' => 'bottom',
+	] );
+	
+	acf_add_local_field_group( [
+		'key'      => 'formsender_archive',
+		'title'    => 'Данные формы',
+		'fields'   => [
+			[
+				'key'   => 'formfield_1',
+				'label' => 'Поле 1',
+				'name'  => 'formfield_1',
+				'type'  => 'text',
+			],[
+				'key'   => 'formfield_2',
+				'label' => 'Поле 2',
+				'name'  => 'formfield_2',
+				'type'  => 'text',
+			],[
+				'key'   => 'formfield_3',
+				'label' => 'Поле 3',
+				'name'  => 'formfield_3',
+				'type'  => 'text',
+			],[
+				'key'   => 'formfield_4',
+				'label' => 'Поле 4',
+				'name'  => 'formfield_4',
+				'type'  => 'text',
+			],[
+				'key'   => 'formfield_5',
+				'label' => 'Поле 5',
+				'name'  => 'formfield_5',
+				'type'  => 'text',
+			],[
+				'key'   => 'formfield_6',
+				'label' => 'Поле 6',
+				'name'  => 'formfield_6',
+				'type'  => 'text',
+			],[
+				'key'   => 'formfield_7',
+				'label' => 'Поле 7',
+				'name'  => 'formfield_7',
+				'type'  => 'text',
+			],[
+				'key'   => 'formfield_8',
+				'label' => 'Поле 8',
+				'name'  => 'formfield_8',
+				'type'  => 'text',
+			],[
+				'key'   => 'formfield_9',
+				'label' => 'Поле 9',
+				'name'  => 'formfield_9',
+				'type'  => 'text',
+			],[
+				'key'   => 'formfield_10',
+				'label' => 'Поле 10',
+				'name'  => 'formfield_10',
+				'type'  => 'text',
+			],
+		],
+		'location' => [
+			[
+				[
+					'param'    => 'post_type',
+					'operator' => '==',
+					'value'    => 'formarchive',
 				],
 			],
 		],
