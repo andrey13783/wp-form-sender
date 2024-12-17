@@ -1,7 +1,9 @@
+<? $session_id = rand(100,999); ?>
 <? $url = ((!empty($_SERVER['HTTPS'])) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>
-<form class="contact-form" id="form_<?=$form_id?>">
+<form class="contact-form" method="post" enctype="multipart/form-data" id="form_<?=$form_id?>">
   <input type="hidden" name="key" value="" class="form-key">
   <input type="hidden" name="form_id" value="<?=$form_id?>">
+  <input type="hidden" name="session_id" value="form_<?=$session_id?>">
   <input type="hidden" name="site-name" value="<?=get_option('formsender_from_name')?>">
   <input type="hidden" name="url" value="<?=$url?>">
   <div>

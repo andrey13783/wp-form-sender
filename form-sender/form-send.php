@@ -1,15 +1,19 @@
- <?php
+ <?php 
   if (!empty($_REQUEST['key']) && $_REQUEST['key']==md5("secretkey")){
+    $site_url = ((!empty($_SERVER['HTTPS'])) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+    
     require_once($_SERVER['DOCUMENT_ROOT'].'/wp-load.php');
     
     require_once($_SERVER['DOCUMENT_ROOT'].'/wp-content/plugins/form-sender/send-mail.php');
     
     $form_id = $_REQUEST['form_id'];
+    $session_id = $_REQUEST['session_id'];
     
     $save = get_field('save_letters', $form_id);
     $subject = get_field('letter_subject', $form_id);
     $text = nl2br(get_field('letter_text', $form_id));
     $success_url = get_field('success_url', $form_id);
+    $files = array();
     
     foreach ($_REQUEST as $key=>$value){
       $value = is_array($value) ? implode('; ', $value) : $value;
@@ -17,8 +21,36 @@
       $text = str_replace('['.$key.']', $value, $text);
     }
     
+    // Загрузка файлов
+    if ($_FILES){
+      $files = $_FILES[array_key_first($_FILES)];
+      
+      if (get_field('attachments', $form_id)=='save'){
+        if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/wp-content/uploads/form-sender')){
+          mkdir($_SERVER['DOCUMENT_ROOT'].'/wp-content/uploads/form-sender', 0777);
+        }
+        if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/wp-content/uploads/form-sender/'.$session_id)){
+          mkdir($_SERVER['DOCUMENT_ROOT'].'/wp-content/uploads/form-sender/'.$session_id, 0777);
+        }
+        copy($_SERVER['DOCUMENT_ROOT'].'/wp-content/plugins/form-sender/templates/files.php', $_SERVER['DOCUMENT_ROOT'].'/wp-content/uploads/form-sender/'.$session_id.'/index.php');
+        
+        include($_SERVER['DOCUMENT_ROOT'].'/wp-content/plugins/form-sender/inc/translit.php');
+        $tmp_names = $files['tmp_name'];
+        $names = $files['name'];
+        $sizes = $files['size'];
+        $types = $files['type'];
+        $files_num = count($tmp_names);
+        for ($i=0; $i<$files_num; $i++){
+          $file = $tmp_names[$i];
+          move_uploaded_file($file, $_SERVER['DOCUMENT_ROOT'].'/wp-content/uploads/form-sender/'.$session_id.'/'.translit($names[$i]));
+        }
+        
+        $text .= '<br><br><p><a href="'.$site_url.'/wp-content/uploads/form-sender/'.$session_id.'/">Прикрепленные файлы</a></p>';
+      }
+    }
+    
     // Отправка письма
-    $result = sendMail(get_field('form_mail', $form_id), $subject, $text);
+    $result = sendMail(get_field('form_mail', $form_id), $subject, $text, $files);
     
     if (!empty(get_field('form_mail2', $form_id))){
       $mail2 = get_field('form_mail2', $form_id);
@@ -30,7 +62,7 @@
         $subject2 = str_replace('['.$key.']', $value, $subject2);
       }
       
-      $result2 = sendMail($mail2, $subject2, $text2);
+      //$result2 = sendMail($mail2, $subject2, $text2);
     }
     
     // Сохранение писем в БД
@@ -105,7 +137,7 @@
     else{
       $output = array(
         'result' => 'false',
-        'message' => '<p>Извините. Произошла ошибка. '.$result.'</p>',
+        'message' => '<p>Извините. Произошла ошибка. '.print_r($result).'</p>',
         'redirect' => '',
       );
     }

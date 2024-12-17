@@ -6,7 +6,7 @@
   require($_SERVER['DOCUMENT_ROOT'].'/wp-includes/PHPMailer/Exception.php');
   $MAIL = new PHPMailer\PHPMailer\PHPMailer();
   
-  function sendMail($mailto, $subject, $text){
+  function sendMail($mailto, $subject, $text, $files=array()){
     if (get_option('formsender_method')=='phpmail'){
       $headers  = "Content-type: text/html; charset=utf-8\r\n";
       $headers .= "From: ".get_option('formsender_from_name')." <".get_option('formsender_from_mail').">\n";
@@ -19,6 +19,7 @@
         return "false";
       }
     }
+    
     if (get_option('formsender_method')=='smtp'){
       global $MAIL, $config;
       $MAIL->ClearAllRecipients();
@@ -43,6 +44,18 @@
       //$MAIL->addBCC("anweb@bk.ru");
       $MAIL->Subject = $subject;
       $MAIL->msgHTML($text);
+      
+      if (count($files)){
+        $tmp_names = $files['tmp_name'];
+        $names = $files['name'];
+        $sizes = $files['size'];
+        $types = $files['type'];
+        $files_num = count($tmp_names);
+        for ($i=0; $i<$files_num; $i++){
+          $MAIL->addAttachment($tmp_names[$i], $names[$i]);
+        }
+      }
+      
       if ($MAIL->send()){
         return "true";
       }

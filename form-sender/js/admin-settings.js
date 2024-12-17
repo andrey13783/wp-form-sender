@@ -14,9 +14,8 @@ jQuery(document).ready(function(){
   jQuery(".formsend-settings").after('<br><br><div class="form-tabs"><div class="tab-1" data-group="1">Отправка писем</div><div class="tab-2" data-group="2">Интеграция с Telegram</div><div class="tab-3" data-group="3">Интеграция с AMOCRM</div></div>');
   
   
-  
   // Выводим вкладки (табы) настроек формы
-  jQuery(".postbox-header").hide().before('<div class="form-tabs"><div class="tab-1" data-group="1">Форма</div><div class="tab-2" data-group="2">Письма</div><div class="tab-3" data-group="3">Письмо 2</div><div class="tab-4" data-group="4">Настройки</div></div>');
+  jQuery("#acf-form_shortcode").after('<br><br><div class="form-tabs"><div class="tab-1" data-group="1">Форма</div><div class="tab-2" data-group="2">Письма</div><div class="tab-3" data-group="3">Письмо 2</div><div class="tab-4" data-group="4">Настройки</div></div>');
   
   // Нажатие вкладки, показать поля только выбранной группы
   jQuery(document).on("click", ".form-tabs div", function(){
@@ -47,7 +46,7 @@ jQuery(document).ready(function(){
   '            <td>Тип поля</td>'+
   '            <td>'+
   '              <select id="field-type">'+
-  '                <option value="">--Выберите тип поля--</option>'+
+  '                <option value="-">--Выберите тип поля--</option>'+
   '                <option value="text">Текстовое поле</option>'+
   '                <option value="tel">Поле для телефона</option>'+
   '                <option value="email">Поле для e-mail</option>'+
@@ -55,16 +54,18 @@ jQuery(document).ready(function(){
   '                <option value="select">Выпадающий список</option>'+
   '                <option value="radio">Радио кнопки</option>'+
   '                <option value="checkbox">Группа чекбоксов</option>'+
+  '                <option value="file">Загрузка файла</option>'+
+  '                <option value="hidden">Скрытое поле</option>'+
   '                <option value="accept">Согласие на обработку</option>'+
   '                <option value="submit">Кнопка отправки</option>'+
   '              </select>'+
   '            </td>'+
   '          </tr>'+
-  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,checkbox,submit" style="display:none;">'+
+  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,checkbox,file,hidden,submit" style="display:none;">'+
   '            <td>Имя поля</td>'+
   '            <td><input type="text" id="field-name"></td>'+
   '          </tr>'+
-  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,checkbox,accept" style="display:none;">'+
+  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,checkbox,file,hidden,accept" style="display:none;">'+
   '            <td>Подсказка для поля</td>'+
   '            <td><input type="text" id="field-alt"></td>'+
   '          </tr>'+
@@ -74,19 +75,27 @@ jQuery(document).ready(function(){
   '          </tr>'+
   '          <tr class="flied-property" data-for="select,radio,checkbox" style="display:none;">'+
   '            <td>Варианты ответа</td>'+
-  '            <td><textarea id="field-options" rows="5"></textarea></td>'+
+  '            <td><textarea id="field-options" rows="5" placeholder="Введите возможные варианты по одному на строку"></textarea></td>'+
   '          </tr>'+
-  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,checkbox,submit" style="display:none;">'+
+  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,checkbox,file,hidden,submit" style="display:none;">'+
   '            <td>ID поля</td>'+
   '            <td><input type="text" id="field-id"></td>'+
   '          </tr>'+
-  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,checkbox,accept,submit" style="display:none;">'+
+  '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,checkbox,file,hidden,accept,submit" style="display:none;">'+
   '            <td>Класс поля</td>'+
   '            <td><input type="text" id="field-class"></td>'+
   '          </tr>'+
   '          <tr class="flied-property" data-for="text,tel,email,textarea,select,radio,accept,checkbox" style="display:none;">'+
   '            <td>Обязательное поле</td>'+
   '            <td><input type="checkbox" id="field-required"></td>'+
+  '          </tr>'+
+  '          <tr class="flied-property" data-for="file" style="display:none;">'+
+  '            <td>Разрешенные типы файлов</td>'+
+  '            <td><textarea id="field-types" rows="2" placeholder="Перечислите расширения файлов через запятую"></textarea></td>'+
+  '          </tr>'+
+  '          <tr class="flied-property" data-for="file" style="display:none;">'+
+  '            <td>Выбор нескольких файтов</td>'+
+  '            <td><input type="checkbox" id="field-multiple"></td>'+
   '          </tr>'+
   '        </table>'+
   '        <input type="button" value="Закрыть" class="button button-default button-large closebtn">'+
@@ -109,10 +118,6 @@ jQuery(document).ready(function(){
   });
   
   // Открытие/закрытие модального окна
-  jQuery(".callback-btn").click(function(){
-    event.preventDefault();
-    jQuery(".modal-callback").show();
-  });
   jQuery(".form-modal .closebtn").click(function(){
     jQuery(".form-modal").hide();
   });
@@ -154,7 +159,7 @@ function addFormField(){
   
   let required = '';
   if (jQuery("#field-required").prop('checked')==true) required = 'required';
-  
+   
   switch (jQuery("#field-type").val()){
     case 'textarea':
       field = '<label>\n';
@@ -209,6 +214,19 @@ function addFormField(){
     case 'accept':
       field = '<label>\n';
       field += '  <input type="checkbox" name="accept" value="1" '+required+' class="'+jQuery("#field-class").val()+'"> '+jQuery("#field-alt").val()+'\n';
+      field += '</label>\n';
+      break;
+      
+    case 'file':
+      field = '<label>\n';
+      field += '  <input type="file" name="'+jQuery("#field-name").val()+'[]" class="'+jQuery("#field-class").val()+'"';
+      if (jQuery("#field-types").val().length>0){
+        field += ' accept="'+jQuery("#field-types").val()+'"';
+      }
+      if (jQuery("#field-multiple").prop('checked')==true){
+        field += ' multiple="true"';
+      }
+      field += '>\n';
       field += '</label>\n';
       break;
       
